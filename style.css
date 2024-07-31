@@ -1,0 +1,57 @@
+
+*{
+	margin: 0px;
+	padding: 0px;
+}
+
+html, body{
+	height: 100%;
+}
+
+body{
+	font-family: sans-serif;
+	display: flex;
+	flex-direction: row;
+	color: #FFFFFF;
+	background-color: #222222;
+}
+
+main{
+	display: flex;
+	flex: 1;
+	align-content: center;
+	flex-direction: row;
+	justify-content: center;
+	padding: 10px;
+}
+
+#sidebar{
+	background-color: #333333;
+	display: flex;
+	flex-direction: column;
+}
+
+#sidebar>*{
+	margin: 5px;
+}
+
+table{
+	color: #AAAAAA;
+}
+
+#fileInfo, #stlControls{
+	border: 1px rgba(0, 0, 0, 0.2) solid;
+	background-color: rgba(0, 0, 0, 0.1);
+}
+
+#fileInfo{
+	display: none;
+}
+
+#stlControls{
+	display: none;
+}
+
+#downloadLink{
+	display: none;
+}

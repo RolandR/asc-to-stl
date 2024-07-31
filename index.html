@@ -1,0 +1,79 @@
+<!doctype html>
+<html allowfullscreen>
+	<head>
+		<meta charset="utf-8" /> 
+		<title>
+			Elevation to STL
+		</title>
+		<link rel="stylesheet" type="text/css" media="all" href="./style.css" /> 
+	</head>
+	<body>
+		<div id="sidebar">
+			<h1>ASC to STL</h1>
+			<img alt="viridis" id="viridis">
+			<input type="file" id="fileUpload" accept=".asc">
+			<div id="fileInfo">
+				<table>
+					<tr>
+						<td>Rows</td>
+						<td id="info-rows"></td>
+					</tr>
+					<tr>
+						<td>Columns</td>
+						<td id="info-cols"></td>
+					</tr>
+					<tr>
+						<td>Cell size</td>
+						<td id="info-cellSize"></td>
+					</tr>
+					<tr>
+						<td>X Corner</td>
+						<td id="info-xCorner"></td>
+					</tr>
+					<tr>
+						<td>Y Corner</td>
+						<td id="info-yCorner"></td>
+					</tr>
+					<tr>
+						<td>No data value</td>
+						<td id="info-nodataValue"></td>
+					</tr>
+					<tr>
+						<td>Min altitude</td>
+						<td id="info-min"></td>
+					</tr>
+					<tr>
+						<td>Max altitude</td>
+						<td id="info-max"></td>
+					</tr>
+					<tr>
+						<td>Altitude span</td>
+						<td id="info-spread"></td>
+					</tr>
+				</table>
+			</div>
+			<div id="stlControls">
+				<button id="generateStlButton">Generate STL</button>
+				<a id="downloadLink">Download STL</a>
+			</div>
+		</div>
+		<main>
+			<canvas id="heightmapCanvas"></canvas>
+		</main>
+	</body>		
+	
+	<script type="text/javascript" src="./elevation.js"></script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
