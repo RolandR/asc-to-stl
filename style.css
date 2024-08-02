@@ -10,25 +10,49 @@ html, body{
 
 body{
 	font-family: sans-serif;
-	display: flex;
-	flex-direction: row;
 	color: #FFFFFF;
 	background-color: #222222;
 }
 
-main{
+#mainContainer{
+	height: 100%;
 	display: flex;
-	flex: 1;
-	align-content: center;
 	flex-direction: row;
-	justify-content: center;
+}
+
+main{
+	flex: 1;
+	position: relative;
+}
+
+#canvasContainer{
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	bottom: 0px;
+	left: 0px;
+	display: flex;
+	flex-direction: column;
 	padding: 10px;
+}
+
+#heightmapCanvas{
+	min-height: 0;
+	object-fit: contain;
+	object-position: 50% 50%;
+	height: 100%;
+	width: 100%;
 }
 
 #sidebar{
 	background-color: #333333;
 	display: flex;
 	flex-direction: column;
+	width: 300px;
+}
+
+#viridis{
+	align-self: center;
 }
 
 #sidebar>*{
@@ -46,6 +70,19 @@ table{
 
 #fileInfo{
 	display: none;
+}
+
+#fileInfoTable{
+	width: 100%;
+	border-collapse: collapse;
+}
+
+#fileInfoTable tr:nth-child(2n){
+	background-color: rgba(0, 0, 0, 0.1);
+}
+
+#fileInfoTable td{
+	padding: 3px;
 }
 
 #stlControls{
@@ -95,3 +132,9 @@ table{
 	transition-duration: 250ms;
 	transition-timing-function: linear;
 }
+
+/*input, button{
+	background-color: #333333;
+	background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.1));
+	border: 1px #222222 solid;
+}*/

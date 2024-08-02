@@ -176,8 +176,8 @@ function renderHeightmap(heightmap){
 		newImageData.data[i*4+3] = 255;
 		
 		if(heightmap.data[i] == heightmap.nodataValue){
-			newImageData.data[i*4+0] = 0;
-			newImageData.data[i*4+1] = 255;
+			newImageData.data[i*4+0] = 255;
+			newImageData.data[i*4+1] = 0;
 			newImageData.data[i*4+2] = 0;
 			newImageData.data[i*4+3] = 255;
 		}
