@@ -28,11 +28,28 @@ viridisImage.src = "./viridis.png";
 fileInput.onchange = function(e){
 	e.preventDefault();
 	
+	const loadingStatus = document.getElementById("loadingStatus");
+	const loadingContent = document.getElementById("loadingContent");
+	const loadingBar = document.getElementById("loadingBar");
+	
+	loadingStatus.className = "";
+	loadingBar.style.width = "0%";
+	loadingStatus.style.display = "block";
+	loadingContent.innerHTML = "Loading...<br>";
+
+	/*var imagePercentage = document.createElement("span");
+	imagePercentage.innerHTML = "0";
+	loadingContent.appendChild(imagePercentage);*/
+	
 	const file = fileInput.files[0];
 	
 	const reader = new FileReader();
 	
 	reader.onload = function(){
+		
+		loadingContent.innerHTML += "<br>File uploaded, processing...";
+		loadingBar.style.width = "40%";
+		
 		const text = reader.result;
 		const lines = text.split('\n');
 		
@@ -56,9 +73,10 @@ fileInput.onchange = function(e){
 		cellSize = params["cellsize"];
 		nodataValue = params["nodata_value"];
 		
-		console.log("rows: "+rows+". Lines of text: "+lines.length);
+		loadingContent.innerHTML += "<br>Lines of text: "+lines.length;
+		loadingBar.style.width = "45%";
 		
-		const skip = 5;
+		const skip = 4;
 		const previewRows = Math.ceil(rows/skip);
 		const previewCols = Math.ceil(cols/skip);
 		
@@ -73,7 +91,8 @@ fileInput.onchange = function(e){
 			}
 		}
 		
-		console.log("loaded preview array");
+		loadingContent.innerHTML += "<br>Loaded preview array";
+		loadingBar.style.width = "70%";
 		
 		let min = Infinity;
 		let max = -Infinity;
@@ -86,6 +105,9 @@ fileInput.onchange = function(e){
 		}
 		
 		const spread = max-min;
+		
+		loadingContent.innerHTML += "<br>Calculated maximums";
+		loadingBar.style.width = "80%";
 		
 		console.log("min: "+min+", max: "+max+", spread: "+spread);
 		
@@ -117,6 +139,8 @@ fileInput.onchange = function(e){
 		document.getElementById("stlControls").style.display = "block";
 		document.getElementById("stlControls").onclick = function(){generateStl(heightmap)};
 		
+		loadingContent.innerHTML += "<br>Rendering...";
+		loadingBar.style.width = "95%";
 		renderHeightmap(heightmap);
 	}
 	
@@ -164,6 +188,14 @@ function renderHeightmap(heightmap){
 	context.putImageData(newImageData, 0, 0);
 	
 	console.log(heightmap);
+	
+	loadingBar.style.width = "100%";
+	loadingContent.innerHTML += "<br>Ready!";
+	loadingStatus.className = "fading";
+
+	setTimeout(function(){
+		loadingStatus.style.display = "none";
+	}, 500);
 }
 
 function generateStl(heightmap){
