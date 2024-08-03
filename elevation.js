@@ -25,6 +25,23 @@ function generateTransferTable(){
 viridisImage.onload = generateTransferTable;
 viridisImage.src = "./viridis.png";
 
+let loadedString;
+
+document.getElementById("generateStlButton").onclick = function(){
+	
+	const startX = document.getElementById("setting-startX").value*1;
+	const startY = document.getElementById("setting-startY").value*1;
+	const width = document.getElementById("setting-width").value*1;
+	const height = document.getElementById("setting-height").value*1;
+	const step = document.getElementById("setting-step").value*1;
+	const scale = document.getElementById("setting-scale").value*1;
+	
+	console.log(step, startX, startY, width, height);
+	
+	heightmap = generateHeightmapFromString(loadedString, step, startX, startY, width, height);
+	generateStl(heightmap, scale);
+};
+
 fileInput.onchange = function(e){
 	e.preventDefault();
 	
@@ -45,107 +62,122 @@ fileInput.onchange = function(e){
 	
 	const reader = new FileReader();
 	
+	reader.addEventListener("progress", function(e){
+		let progress = ~~((e.loaded/e.total)*60);
+		
+		loadingBar.style.width = progress+"%";
+	});
+	
 	reader.onload = function(){
 		
 		loadingContent.innerHTML += "<br>File uploaded, processing...";
-		loadingBar.style.width = "40%";
+		loadingBar.style.width = "60%";
 		
-		const text = reader.result;
-		const lines = text.split('\n');
+		loadedString = reader.result;
 		
-		let rows = 0;
-		let cols = 0;
-		let xCorner = 0;
-		let yCorner = 0;
-		let cellSize = 0;
-		let nodataValue = 0;
-		
-		let params = {};
-		for(let i = 0; i < 6; i++){
-			let line = lines[i].replace('\r', "").split(" ");
-			params[line[0]] = line[1]*1;
-		}
-		
-		rows = params["nrows"];
-		cols = params["ncols"];
-		xCorner = params["xllcorner"];
-		yCorner = params["yllcorner"];
-		cellSize = params["cellsize"];
-		nodataValue = params["nodata_value"];
-		
-		loadingContent.innerHTML += "<br>Lines of text: "+lines.length;
-		loadingBar.style.width = "45%";
-		
-		const skip = 4;
-		const previewRows = Math.ceil(rows/skip);
-		const previewCols = Math.ceil(cols/skip);
-		
-		let heightmapData = new Float32Array(previewRows*previewCols);
-		
-		const dataLines = lines.slice(7);
-		
-		for(let y = 0; y < dataLines.length; y += skip){
-			const row = dataLines[y].replace('\r', "").split(" ");
-			for(let x = 0; x < row.length; x += skip){
-				heightmapData[~~((rows-y-1)/skip)*previewCols+~~(x/skip)] = row[x];
-			}
-		}
-		
-		loadingContent.innerHTML += "<br>Loaded preview array";
-		loadingBar.style.width = "70%";
-		
-		let min = Infinity;
-		let max = -Infinity;
-		
-		for(let i in heightmapData){
-			if(heightmapData[i] != nodataValue){
-				min = Math.min(min, heightmapData[i]);
-				max = Math.max(max, heightmapData[i]);
-			}
-		}
-		
-		const spread = max-min;
-		
-		loadingContent.innerHTML += "<br>Calculated maximums";
-		loadingBar.style.width = "80%";
-		
-		console.log("min: "+min+", max: "+max+", spread: "+spread);
-		
-		const heightmap = {
-			 rows: previewRows
-			,cols: previewCols
-			,cellSize: cellSize*skip
-			,xCorner: xCorner
-			,yCorner: yCorner
-			,nodataValue: nodataValue
-			,min: min
-			,max: max
-			,spread: spread
-			,data: heightmapData
-		}
+		heightmap = generateHeightmapFromString(loadedString, 4, 0, 0);
+		//heightmap = generateHeightmapFromString(loadedString, 1, 0, 0, 100, 100);
 		
 		document.getElementById("fileInfo").style.display = "block";
 		
-		document.getElementById("info-rows").innerHTML = rows;
-		document.getElementById("info-cols").innerHTML = cols;
-		document.getElementById("info-cellSize").innerHTML = cellSize;
-		document.getElementById("info-xCorner").innerHTML = xCorner;
-		document.getElementById("info-yCorner").innerHTML = yCorner;
-		document.getElementById("info-nodataValue").innerHTML = nodataValue;
+		document.getElementById("info-rows").innerHTML = heightmap.rows*heightmap.step;
+		document.getElementById("info-cols").innerHTML = heightmap.cols*heightmap.step;
+		document.getElementById("info-cellSize").innerHTML = heightmap.cellSize/heightmap.step;
+		document.getElementById("info-xCorner").innerHTML = heightmap.xCorner;
+		document.getElementById("info-yCorner").innerHTML = heightmap.yCorner;
+		document.getElementById("info-nodataValue").innerHTML = heightmap.nodataValue;
 		document.getElementById("info-min").innerHTML = Math.round(heightmap.min*100)/100;
 		document.getElementById("info-max").innerHTML = Math.round(heightmap.max*100)/100;
 		document.getElementById("info-spread").innerHTML = Math.round(heightmap.spread*100)/100;
 		
 		document.getElementById("stlControls").style.display = "block";
-		document.getElementById("stlControls").onclick = function(){generateStl(heightmap)};
 		
 		loadingContent.innerHTML += "<br>Rendering...";
 		loadingBar.style.width = "95%";
-		renderHeightmap(heightmap);
+		
+		setTimeout(function(){renderHeightmap(heightmap);}, 100);
 	}
 	
-	reader.readAsText(file);
+	setTimeout(function(){reader.readAsText(file);}, 100);
 
+}
+
+function generateHeightmapFromString(string, step, startX, startY, width, height){
+	
+	const lines = string.split('\n');
+	
+	let rows = 0;
+	let cols = 0;
+	let xCorner = 0;
+	let yCorner = 0;
+	let cellSize = 0;
+	let nodataValue = 0;
+	
+	let params = {};
+	for(let i = 0; i < 6; i++){
+		let line = lines[i].replace('\r', "").split(" ");
+		params[line[0]] = line[1]*1;
+	}
+	
+	rows = params["nrows"];
+	cols = params["ncols"];
+	xCorner = params["xllcorner"];
+	yCorner = params["yllcorner"];
+	cellSize = params["cellsize"];
+	nodataValue = params["nodata_value"];
+	
+	const outputRows = width ? Math.ceil((width/cellSize)/step) : Math.ceil(rows/step);
+	const outputCols = height ? Math.ceil((height/cellSize)/step) : Math.ceil(cols/step);
+	
+	let heightmapData = new Float32Array(outputRows*outputCols);
+	
+	const dataLines = lines.slice(7);
+	
+	startX = ~~(startX/cellSize);
+	startY = ~~(startY/cellSize);
+	
+	const endY = width ? startY+(width/cellSize) : dataLines.length;
+	
+	//console.log("Y ", startY, endY);
+	
+	for(let y = startY; y < endY; y += step){
+		const row = dataLines[y].replace('\r', "").split(" ");
+		const endX = height ? startX+(height/cellSize) : row.length;
+		for(let x = startX; x < endX; x += step){
+			heightmapData[~~((outputRows-(y-startY)/step-1))*outputCols+~~((x-startX)/step)] = row[x];
+			/*if(width){
+				console.log(~~((outputRows-(y-startY)/step-1))*outputCols, ~~((x-startX)/step));
+			}*/
+		}
+	}
+	
+	let min = Infinity;
+	let max = -Infinity;
+	
+	for(let i in heightmapData){
+		if(heightmapData[i] != nodataValue){
+			min = Math.min(min, heightmapData[i]);
+			max = Math.max(max, heightmapData[i]);
+		}
+	}
+	
+	const spread = max-min;
+	
+	const heightmap = {
+		 rows: outputRows
+		,cols: outputCols
+		,cellSize: cellSize*step
+		,xCorner: xCorner
+		,yCorner: yCorner
+		,nodataValue: nodataValue
+		,min: min
+		,max: max
+		,spread: spread
+		,step: step
+		,data: heightmapData
+	}
+	
+	return heightmap;
 }
 
 function renderHeightmap(heightmap){
@@ -183,11 +215,8 @@ function renderHeightmap(heightmap){
 		}
 	}
 	
-	console.log(newImageData);
 	
 	context.putImageData(newImageData, 0, 0);
-	
-	console.log(heightmap);
 	
 	loadingBar.style.width = "100%";
 	loadingContent.innerHTML += "<br>Ready!";
@@ -198,11 +227,11 @@ function renderHeightmap(heightmap){
 	}, 500);
 }
 
-function generateStl(heightmap){
+function generateStl(heightmap, scale){
 	const numTriangles = (heightmap.cols-1)*(heightmap.rows-1)*2;
 	const sizeBytes = 84+(numTriangles*50);
 	
-	const scale = 1/1000;
+	//const scale = 1/1000;
 	
 	const buffer = new ArrayBuffer(sizeBytes);
 	const view = new DataView(buffer);
@@ -301,8 +330,8 @@ function generateStl(heightmap){
 		}
 	}
 	
-	console.log(view);
-	console.log(view.buffer);
+	//console.log(view);
+	//console.log(view.buffer);
 	
 	var blob = new Blob([view.buffer], {type: "model/stl"});
     var objectUrl = URL.createObjectURL(blob);
