@@ -57,13 +57,13 @@
 					<h2>STL Export</h2>
 					<div id="stlSettings">
 						<label for="setting-startX">Upper Left X</label>
-						<input id="setting-startX" type="number" value="0">
+						<input id="setting-startX" type="number" value="1000">
 						<label for="setting-startY">Upper Left Y</label>
-						<input id="setting-startY" type="number" value="0">
+						<input id="setting-startY" type="number" value="500">
 						<label for="setting-width">Width (m)</label>
-						<input id="setting-width" type="number" value="100">
+						<input id="setting-width" type="number" value="500">
 						<label for="setting-height">Height (m)</label>
-						<input id="setting-height" type="number" value="100">
+						<input id="setting-height" type="number" value="500">
 						<label for="setting-scale">Scale (Units)</label>
 						<input id="setting-scale" type="number" value="0.001">
 						<label for="setting-step">Sample every <i>n</i>th step</label>
@@ -76,6 +76,7 @@
 			<main>
 				<div id="canvasContainer">
 					<canvas id="heightmapCanvas"></canvas>
+					<canvas id="selectionCanvas"></canvas>
 				</div>
 			</main>
 		</div>

@@ -37,12 +37,17 @@ main{
 	padding: 10px;
 }
 
-#heightmapCanvas{
+#heightmapCanvas, #selectionCanvas{
 	min-height: 0;
 	object-fit: contain;
 	object-position: 50% 50%;
 	height: 100%;
 	width: 100%;
+	position: absolute;
+}
+
+#heightmapCanvas{
+	transform: scale(1, -1); /* look, I'll properly deal with it sometime(tm) */
 }
 
 #sidebar{

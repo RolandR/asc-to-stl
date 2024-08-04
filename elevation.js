@@ -26,6 +26,7 @@ viridisImage.onload = generateTransferTable;
 viridisImage.src = "./viridis.png";
 
 let loadedString;
+let currentHeightmap;
 
 document.getElementById("generateStlButton").onclick = function(){
 	
@@ -94,6 +95,10 @@ fileInput.onchange = function(e){
 		
 		loadingContent.innerHTML += "<br>Rendering...";
 		loadingBar.style.width = "95%";
+		
+		currentHeightmap = heightmap;
+		
+		updateSelectionCanvas();
 		
 		setTimeout(function(){renderHeightmap(heightmap);}, 100);
 	}
@@ -342,8 +347,42 @@ function generateStl(heightmap, scale){
 	
 }
 
+function updateSelectionCanvas(){
+	if(currentHeightmap){
+		const startX = document.getElementById("setting-startX").value*1;
+		const startY = document.getElementById("setting-startY").value*1;
+		const width = document.getElementById("setting-width").value*1;
+		const height = document.getElementById("setting-height").value*1;
+		const step = document.getElementById("setting-step").value*1;
+		const scale = document.getElementById("setting-scale").value*1;
+		
+		const canvas = document.getElementById("selectionCanvas");
+		const context = canvas.getContext("2d");
+		
+		canvas.width = currentHeightmap.cols;
+		canvas.height = currentHeightmap.rows;
+		
+		context.strokeStyle = "rgba(255, 0, 100, 1.0)";
+		context.fillStyle = "rgba(255, 0, 100, 0.2)";
+		context.lineWidth = 2;
+		context.beginPath();
+		context.rect(
+			~~((startX/currentHeightmap.step)/(currentHeightmap.cellSize/currentHeightmap.step))+0.5,
+			~~((startY/currentHeightmap.step)/(currentHeightmap.cellSize/currentHeightmap.step))+0.5,
+			~~((width/currentHeightmap.step)/(currentHeightmap.cellSize/currentHeightmap.step)),
+			~~((height/currentHeightmap.step)/(currentHeightmap.cellSize/currentHeightmap.step))
+		);
+		context.fill();
+		context.stroke();
+	}
+}
 
-
+document.getElementById("setting-startX").addEventListener("input", updateSelectionCanvas);
+document.getElementById("setting-startY").addEventListener("input", updateSelectionCanvas);
+document.getElementById("setting-width").addEventListener("input", updateSelectionCanvas);
+document.getElementById("setting-height").addEventListener("input", updateSelectionCanvas);
+document.getElementById("setting-step").addEventListener("input", updateSelectionCanvas);
+document.getElementById("setting-scale").addEventListener("input", updateSelectionCanvas);
 
 
 
