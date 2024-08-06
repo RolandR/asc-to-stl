@@ -335,6 +335,9 @@ function generateStl(heightmap, scale){
 		}
 	}
 	
+	console.log("byteOffset: "+byteOffset);
+	console.log("calculated: "+numTriangles+" Triangles, "+sizeBytes);
+	
 	//console.log(view);
 	//console.log(view.buffer);
 	
@@ -374,6 +377,25 @@ function updateSelectionCanvas(){
 		);
 		context.fill();
 		context.stroke();
+		
+		// Update info
+		
+		const infoElement = document.getElementById("stlInfo");
+		
+		const rows = Math.ceil((width/(currentHeightmap.cellSize/currentHeightmap.step))/step);
+		const cols = Math.ceil((height/(currentHeightmap.cellSize/currentHeightmap.step))/step);
+		const numTriangles = (cols-1)*(rows-1)*2;
+		const sizeBytes = 84+(numTriangles*50);
+		
+		console.log("display: "+sizeBytes);
+		
+		const k = 1024;
+		const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+		const decimal = 0;
+		const i = Math.floor(Math.log(sizeBytes) / Math.log(k));
+		const fileSize = parseFloat((sizeBytes / Math.pow(k, i)).toFixed(decimal))+" "+sizes[i];
+		
+		infoElement.innerHTML = numTriangles+" Triangles, "+fileSize;
 	}
 }
 
