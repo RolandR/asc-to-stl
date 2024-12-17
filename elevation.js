@@ -111,6 +111,119 @@ function generateHeightmapFromString(string, step, startX, startY, width, height
 	
 	const lines = string.split('\n');
 	
+	console.log(lines[0]);
+	
+	if(lines[0] == "X Y Z\r" || lines[0] == "X Y Z"){
+		console.log("XYZ detected");
+		return generateHeightmapFromXYZ(lines, step, startX, startY, width, height);
+	} else {
+		return generateHeightmapFromASC(lines, step, startX, startY, width, height);
+	}
+}
+
+function generateHeightmapFromXYZ(lines, step, startX, startY, width, height){
+	
+	let rows = 0;
+	let cols = 0;
+	let xCorner = 0;
+	let yCorner = 0;
+	let cellSize = 0;
+	let nodataValue = 0;
+	
+	let xData = new Float32Array(lines.length-2);
+	let yData = new Float32Array(lines.length-2);
+	let zData = new Float32Array(lines.length-2);
+	
+	for(let i = 0; i < lines.length-1; i++){
+		let line = lines[i+1].replace('\r', "").split(" ");
+		xData[i] = line[0]*1;
+		yData[i] = line[1]*1;
+		zData[i] = line[2]*1;
+		
+		if(xData[i] == 0){
+				console.log("x at "+i);
+		}
+		if(yData[i] == 0){
+				console.log("y at "+i);
+		}
+	}
+	
+	xCorner = xData.reduce((a, b) => Math.min(a, b), Infinity);
+	yCorner = yData.reduce((a, b) => Math.min(a, b), Infinity);
+	cellSize = xData[2] - xData[1]; //assuming a regular grid with square cells
+	rows = (xData.reduce((a, b) => Math.max(a, b), -Infinity)-xCorner)/cellSize;
+	cols = (yData.reduce((a, b) => Math.max(a, b), -Infinity)-yCorner)/cellSize;
+	
+	console.log(xCorner, yCorner, cellSize, rows, cols);
+	
+	let dataLines = [];
+	for(let i = 0; i <= rows; i++){
+		dataLines[i] = [];
+	}
+	
+	
+	let x = 0;
+	let y = 0;
+	let z = 0;
+	for(let i = 0; i < xData.length; i++){ // this is the easy, but slow way, I might do it better if I can be bothered at some point
+		x = xData[i];
+		y = yData[i];
+		z = zData[i];
+		x = (x-xCorner)/cellSize;
+		y = (y-yCorner)/cellSize;
+		dataLines[y][x] = z;
+	}
+	
+	const outputRows = width ? Math.ceil((width/cellSize)/step) : Math.ceil(rows/step);
+	const outputCols = height ? Math.ceil((height/cellSize)/step) : Math.ceil(cols/step);
+	
+	let heightmapData = new Float32Array(outputRows*outputCols);
+	
+	startX = ~~(startX/cellSize);
+	startY = ~~(startY/cellSize);
+	
+	const endY = width ? startY+(width/cellSize) : dataLines.length;
+	
+	//console.log("Y ", startY, endY);
+	
+	for(let y = startY; y < endY; y += step){
+		const row = dataLines[y];
+		const endX = height ? startX+(height/cellSize) : row.length;
+		for(let x = startX; x < endX; x += step){
+			heightmapData[~~((outputRows-(y-startY)/step-1))*outputCols+~~((x-startX)/step)] = row[x];
+		}
+	}
+	
+	let min = Infinity;
+	let max = -Infinity;
+	
+	for(let i in heightmapData){
+		if(heightmapData[i] != nodataValue){
+			min = Math.min(min, heightmapData[i]);
+			max = Math.max(max, heightmapData[i]);
+		}
+	}
+	
+	const spread = max-min;
+	
+	const heightmap = {
+		 rows: outputRows
+		,cols: outputCols
+		,cellSize: cellSize*step
+		,xCorner: xCorner
+		,yCorner: yCorner
+		,nodataValue: nodataValue
+		,min: min
+		,max: max
+		,spread: spread
+		,step: step
+		,data: heightmapData
+	}
+	
+	return heightmap;
+}
+
+function generateHeightmapFromASC(lines, step, startX, startY, width, height){
 	let rows = 0;
 	let cols = 0;
 	let xCorner = 0;
