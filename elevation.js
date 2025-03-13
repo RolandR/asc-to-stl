@@ -27,6 +27,7 @@ viridisImage.src = "./viridis.png";
 
 let loadedString;
 let currentHeightmap;
+let filename = "output";
 
 document.getElementById("generateStlButton").onclick = function(){
 	
@@ -61,6 +62,8 @@ fileInput.onchange = function(e){
 	
 	const file = fileInput.files[0];
 	
+	filename = file.name.substring(0, file.name.length-4); // this assumes the name ends in .xyz or .asc
+	
 	const reader = new FileReader();
 	
 	reader.addEventListener("progress", function(e){
@@ -83,13 +86,15 @@ fileInput.onchange = function(e){
 		
 		document.getElementById("info-rows").innerHTML = heightmap.rows*heightmap.step;
 		document.getElementById("info-cols").innerHTML = heightmap.cols*heightmap.step;
-		document.getElementById("info-cellSize").innerHTML = heightmap.cellSize/heightmap.step;
+		document.getElementById("info-height").innerHTML = heightmap.rows*heightmap.cellSize + " m";
+		document.getElementById("info-width").innerHTML = heightmap.cols*heightmap.cellSize + " m";
+		document.getElementById("info-cellSize").innerHTML = heightmap.cellSize/heightmap.step + " m";
 		document.getElementById("info-xCorner").innerHTML = heightmap.xCorner;
 		document.getElementById("info-yCorner").innerHTML = heightmap.yCorner;
 		document.getElementById("info-nodataValue").innerHTML = heightmap.nodataValue;
-		document.getElementById("info-min").innerHTML = Math.round(heightmap.min*100)/100;
-		document.getElementById("info-max").innerHTML = Math.round(heightmap.max*100)/100;
-		document.getElementById("info-spread").innerHTML = Math.round(heightmap.spread*100)/100;
+		document.getElementById("info-min").innerHTML = Math.round(heightmap.min*100)/100 + " m";
+		document.getElementById("info-max").innerHTML = Math.round(heightmap.max*100)/100 + " m";
+		document.getElementById("info-spread").innerHTML = Math.round(heightmap.spread*100)/100 + " m";
 		
 		document.getElementById("stlControls").style.display = "block";
 		
@@ -111,9 +116,11 @@ function generateHeightmapFromString(string, step, startX, startY, width, height
 	
 	const lines = string.split('\n');
 	
+	lines[0] = lines[0].toLowerCase().trim().replace(/\s+/, " ").replace('\r', "");
+	
 	console.log(lines[0]);
 	
-	if(lines[0] == "X Y Z\r" || lines[0] == "X Y Z"){
+	if(lines[0] == "x y z"){
 		console.log("XYZ detected");
 		return generateHeightmapFromXYZ(lines, step, startX, startY, width, height);
 	} else {
@@ -233,8 +240,9 @@ function generateHeightmapFromASC(lines, step, startX, startY, width, height){
 	
 	let params = {};
 	for(let i = 0; i < 6; i++){
-		let line = lines[i].replace('\r', "").split(" ");
-		params[line[0]] = line[1]*1;
+		let line = lines[i].toLowerCase().trim().replace(/\s+/, " ").replace('\r', "").split(" ");
+		console.log(line);
+		params[line[0].toLowerCase()] = line[1]*1;
 	}
 	
 	rows = params["nrows"];
@@ -259,13 +267,18 @@ function generateHeightmapFromASC(lines, step, startX, startY, width, height){
 	//console.log("Y ", startY, endY);
 	
 	for(let y = startY; y < endY; y += step){
-		const row = dataLines[y].replace('\r', "").split(" ");
-		const endX = height ? startX+(height/cellSize) : row.length;
-		for(let x = startX; x < endX; x += step){
-			heightmapData[~~((outputRows-(y-startY)/step-1))*outputCols+~~((x-startX)/step)] = row[x];
-			/*if(width){
-				console.log(~~((outputRows-(y-startY)/step-1))*outputCols, ~~((x-startX)/step));
-			}*/
+		if(dataLines[y]){
+			const row = dataLines[y].trim().replace(/\s+/, " ").replace('\r', "").split(" ");
+			const endX = height ? startX+(height/cellSize) : row.length;
+			for(let x = startX; x < endX; x += step){
+				if(row[x]){
+					heightmapData[~~((outputRows-(y-startY)/step-1))*outputCols+~~((x-startX)/step)] = row[x];
+				} else {
+					console.warn("No data at y="+y+", x="+x);
+				}
+			}
+		} else {
+			console.warn("No datalines at y="+y);
 		}
 	}
 	
@@ -459,6 +472,7 @@ function generateStl(heightmap, scale){
 	
 	const downloadLink = document.getElementById("downloadLink");
 	downloadLink.href = objectUrl;
+	downloadLink.download = filename + ".stl";
 	downloadLink.style.display = "block";
 	
 }
