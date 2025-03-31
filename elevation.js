@@ -143,15 +143,15 @@ function generateHeightmapFromXYZ(lines, step, startX, startY, width, height){
 	
 	for(let i = 0; i < lines.length-1; i++){
 		let line = lines[i+1].replace('\r', "").split(" ");
-		xData[i] = line[0]*1;
-		yData[i] = line[1]*1;
-		zData[i] = line[2]*1;
+		xData[i] = parseFloat(line[0]);
+		yData[i] = parseFloat(line[1]);
+		zData[i] = parseFloat(line[2]);
 		
 		if(xData[i] == 0){
-				console.log("x at "+i);
+				console.log("x is 0 at "+i);
 		}
 		if(yData[i] == 0){
-				console.log("y at "+i);
+				console.log("y is 0 at "+i);
 		}
 	}
 	
@@ -197,7 +197,7 @@ function generateHeightmapFromXYZ(lines, step, startX, startY, width, height){
 		const row = dataLines[y];
 		const endX = height ? startX+(height/cellSize) : row.length;
 		for(let x = startX; x < endX; x += step){
-			heightmapData[~~((outputRows-(y-startY)/step-1))*outputCols+~~((x-startX)/step)] = row[x];
+			heightmapData[~~(((y-startY)/step-1)+1)*outputCols+~~((x-startX)/step)] = row[x];
 		}
 	}
 	

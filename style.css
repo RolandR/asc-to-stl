@@ -41,8 +41,8 @@ main{
 	min-height: 0;
 	object-fit: contain;
 	object-position: 50% 50%;
-	height: 100%;
-	width: 100%;
+	height: calc(100% - 20px);
+	width: calc(100% - 20px);
 	position: absolute;
 }
 
